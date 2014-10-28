@@ -127,6 +127,10 @@ $DRUSH @$SRC_ALIAS -y cache-clear all
 echo -e "\nTurning maintenance mode off."
 $DRUSH @$SRC_ALIAS vset maintenance_mode 0
 
+# Clear the cache again to be sure maintenance mode is not preserved
+echo -e "\nClearing the Drupal cache."
+$DRUSH @$SRC_ALIAS -y cache-clear all
+
 # All done
 echo -e "\nCopying of code from here to$DEST_URIS is complete."
 

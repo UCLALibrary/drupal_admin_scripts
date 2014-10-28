@@ -138,5 +138,9 @@ $DRUSH @$DEST_ALIAS -y cache-clear all
 echo -e "Drupal file synchronization is complete - taking destination site out of maintenance mode. \n"
 $DRUSH @$DEST_ALIAS vset maintenance_mode 0
 
+# Clear the Drupal cache in the destination database again to be sure maintenance mode is not preserved
+echo -e "Clearing the Drupal cache. \n"
+$DRUSH @$DEST_ALIAS -y cache-clear all
+
 echo -e "\nCopy of code from $SRC_URI to "$EACH_DEST_URI" complete. \n"
 
