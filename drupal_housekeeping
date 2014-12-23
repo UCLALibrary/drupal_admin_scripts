@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# Clean /var/www/vhosts/webheads/sites_default_files/tmp
+
+find /var/www/vhosts/webheads/sites_default_files/tmp -type f -mtime +14 | \
+	xargs rm -f
