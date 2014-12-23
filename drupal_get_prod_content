@@ -6,8 +6,9 @@
 ## Order of operations:
 ## 1. Test ability to use drush to connect to the production Drupal instances
 ## 2. Copy the production static files to the directory used by local Drupal instance
-## 3. Copy the production database to the database used by the local Drupal instance
-## 4. Clear the local Drupal cache (in the database)
+## 3. Drop the local Drupal instance's database tables to ensure a clean environment to import into
+## 4. Copy the production database tables to the database used by the local Drupal instance
+## 5. Clear the local Drupal cache (in the database)
 ##
 ## NOTE: database and static file operations are performed once, because each
 ## set of test, stage or production static files and database is shared by each
@@ -94,12 +95,19 @@ done
 # STEP 3 --------------------------------------------------------------------------------------------------------------
 echo -e "\nSTEP 3 \n"
 
+# Drop all tables in the database used by $DEST_ALIAS - this is to ensure a clean local environment
+echo -e "Dropping all tables used by $DEST_ALIAS. \n"
+$DRUSH @$DEST_ALIAS sql-drop --yes
+
+# STEP 4 --------------------------------------------------------------------------------------------------------------
+echo -e "\nSTEP 4 \n"
+
 # Copy the database used by $SRC_ALIAS to the one used by $DEST_ALIAS
 echo -e "Copying the database used by $SRC_ALIAS to the one used by $DEST_ALIAS. \n"
 $DRUSH sql-sync @$SRC_ALIAS @$DEST_ALIAS --no-cache --yes
 
-# STEP 4 --------------------------------------------------------------------------------------------------------------
-echo -e "\nSTEP 4 \n"
+# STEP 5 --------------------------------------------------------------------------------------------------------------
+echo -e "\nSTEP 5 \n"
 
 # Clear the $DEST_ALIAS Drupal Cache
 echo -e "Clearing the Drupal cache for $DEST_ALIAS... \n"
