@@ -16,6 +16,7 @@ Creates a daily backup of the local Drupal instance's:
 2. static files
 3. drupal document root
 This script is run from druadmin's crontab
+```
 
 * drupal_copy_code : all webhead environments come in pairs - this script copies the Drupal code from webhead1 to webhead2 (or vice versa) in a given test, stage, or production realm
 ```
