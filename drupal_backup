@@ -3,7 +3,7 @@
 ## Create a daily backup of the local Drupal instance's:
 ## 1. database content
 ## 2. static files
-## 3. drupal document root 
+## 3. drupal document root
 ## This script is run from druadmin's crontab
 
 # Must be this user to run this script
@@ -66,11 +66,12 @@ for SUBDIR in $SUBDIR_LIST; do
 	#   Windows-specific Thumbs.db files
 	# ./.check_mount, which Nagios uses to verify that the file system is mounted
 	tar czf $SUBDIR_TAR_GZ -C $WEBHEAD_ROOT/$SUBDIR .	\
-		--exclude ".apdisk"			\
-		--exclude ".DS_Store"			\
-		--exclude ".TemporaryItems"		\
-		--exclude "Thumbs.db"			\
-		--exclude "./.check_mount" > /dev/null 2>&1
+		--exclude ".apdisk"           \
+		--exclude ".DS_Store"         \
+		--exclude ".TemporaryItems"   \
+		--exclude "Thumbs.db"         \
+		--exclude "./.check_mount"    \
+    --exclude ".snapshot" > /dev/null 2>&1
 	# Exit codes 0 (sucess) and 1 (file changed) are acceptable - anything else is fatal error
 	# Exit code 1: Periodically Varnish cache runs status.php, which adds and deletes a file in sites_default_files
 	if [ $? -ne 0 -a $? -ne 1 ] ; then
