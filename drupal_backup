@@ -43,41 +43,41 @@ mkdir -p $BACKUP_DIR
 echo -e "\nCreating SQL dump file from $SRC_DRUSH Drupal instance \n"
 $DRUSH $SRC_DRUSH sql-dump --result-file=$SQL_DUMP --gzip
 if [ ! -s "${SQL_DUMP}.gz" ] ; then
-	echo -e "\nFailed to create the MySQL database dump file $SQL_DUMP - exiting \n"
-	exit 1
+  echo -e "\nFailed to create the MySQL database dump file $SQL_DUMP - exiting \n"
+  exit 1
 fi
 
 # Create a gzipped TAR file of each subdirectory in SUBDIR_LIST
 for SUBDIR in $SUBDIR_LIST; do
 
-	# Name of the gzipped TAR file
-	SUBDIR_TAR_GZ="$BACKUP_DIR/`echo $SRC_DRUSH | sed 's/@//'`_${SUBDIR}_${TODAY}.tar.gz"
+  # Name of the gzipped TAR file
+  SUBDIR_TAR_GZ="$BACKUP_DIR/`echo $SRC_DRUSH | sed 's/@//'`_${SUBDIR}_${TODAY}.tar.gz"
 
-	# Create the gzipped TAR file
-	echo -e "\nCreating gzipped $SUBDIR directory archive... \n"
+  # Create the gzipped TAR file
+  echo -e "\nCreating gzipped $SUBDIR directory archive... \n"
 
-	# -C: tar from within the SUBDIR directory
-	#   Per akohler: Exclude the subdirectory itself, because it has a different
-	#   name in the development environment
-	# --exclude:
-	#   OS-X-specific .apdisk files
-	#   OS-X-specific .DS_Store files
-	#   OS-X-specific .TemporaryItems directories
-	#   Windows-specific Thumbs.db files
-	# ./.check_mount, which Nagios uses to verify that the file system is mounted
-	tar czf $SUBDIR_TAR_GZ -C $WEBHEAD_ROOT/$SUBDIR .	\
-		--exclude ".apdisk"           \
-		--exclude ".DS_Store"         \
-		--exclude ".TemporaryItems"   \
-		--exclude "Thumbs.db"         \
-		--exclude "./.check_mount"    \
+  # -C: tar from within the SUBDIR directory
+  #   Per akohler: Exclude the subdirectory itself, because it has a different
+  #   name in the development environment
+  # --exclude:
+  #   OS-X-specific .apdisk files
+  #   OS-X-specific .DS_Store files
+  #   OS-X-specific .TemporaryItems directories
+  #   Windows-specific Thumbs.db files
+  # ./.check_mount, which Nagios uses to verify that the file system is mounted
+  tar czf $SUBDIR_TAR_GZ -C $WEBHEAD_ROOT/$SUBDIR .	\
+    --exclude ".apdisk"           \
+    --exclude ".DS_Store"         \
+    --exclude ".TemporaryItems"   \
+    --exclude "Thumbs.db"         \
+    --exclude "./.check_mount"    \
     --exclude ".snapshot" > /dev/null 2>&1
-	# Exit codes 0 (sucess) and 1 (file changed) are acceptable - anything else is fatal error
-	# Exit code 1: Periodically Varnish cache runs status.php, which adds and deletes a file in sites_default_files
-	if [ $? -ne 0 -a $? -ne 1 ] ; then
-		echo -e "\nFailed to create the '$SUBDIR_TAR_GZ' archive - exiting \n"
-		exit 1
-	fi
+  # Exit codes 0 (sucess) and 1 (file changed) are acceptable - anything else is fatal error
+  # Exit code 1: Periodically Varnish cache runs status.php, which adds and deletes a file in sites_default_files
+  if [ $? -ne 0 -a $? -ne 1 ] ; then
+    echo -e "\nFailed to create the '$SUBDIR_TAR_GZ' archive - exiting \n"
+    exit 1
+  fi
 done
 
 # -------------------------------------------------------------
