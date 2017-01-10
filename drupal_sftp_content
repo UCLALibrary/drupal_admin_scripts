@@ -14,13 +14,13 @@ if [ "`/usr/bin/id -urn`" != "$USER" ] ; then
   exit 1
 fi
 
-DRUSH=/usr/local/bin/drush
+DRUSH="/home/druadmin/.composer/vendor/bin/drush"
 
 # Get local drush alias
 # Drush Alias - only need one as all webheads share the same database instance and the same static files
 # All drush aliases can be found in ~/$USER/.drush/aliases.drushrc.php
 # Our convention for Drush aliases: @rhel-[test|stage|prod][0-9]
-SRC_DRUSH=@`$DRUSH site-alias --local`
+SRC_DRUSH=`$DRUSH site-alias --local-only`
 if [ $? -ne 0 ] ; then
   echo -e "Failed to get alias for local Drupal instance - exiting \n"
   exit 1
@@ -116,3 +116,4 @@ fi
 
 # Clean up DB dump and static files
 rm -rf $TMP_DIR
+

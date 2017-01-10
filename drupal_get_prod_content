@@ -20,14 +20,14 @@
 #   an entry for the local machine
 USER=druadmin
 if [ "`/usr/bin/id -urn`" != "$USER" ] ; then
-	echo "You must be the $USER user to execute this script - exiting."
-	exit 1
+  echo "You must be the $USER user to execute this script - exiting."
+  exit 1
 fi
 
 # Avoid being in the Drupal root tree to avoid built-in aliases (e.g. @self)
 cd $HOME
 
-DRUSH="/usr/local/bin/drush"
+DRUSH="/home/druadmin/.composer/vendor/bin/drush"
 
 # Can this value be found somewhere, instead of being hard-coded?
 # Webhead Static Files Dir - path is the same on all Webheads
@@ -35,23 +35,23 @@ STATIC_FILES="/var/www/vhosts/webhead/sites_default_files/"
 
 # Get local (destination) drush alias
 # All drush aliases can be found in /home/$USER/.drush/aliases.drushrc.php
-DEST_ALIAS=`$DRUSH site-alias --local`
+DEST_ALIAS=`$DRUSH site-alias --local-only`
 if [ $? -ne 0 ] ; then
-        echo -e "Unable to get destination alias for local Drupal instance - exiting \n"
-        exit 1
+  echo -e "Unable to get destination alias for local Drupal instance - exiting \n"
+  exit 1
 fi
 
 # Ensure that (local) destination is RHEL test or stage
 # Expected drush alias format is rhel-test[digits], rhel-stage[digits], rhel-prod[digits]
 case "$DEST_ALIAS" in
-rhel-test*|rhel-stage*)
-	# Database content will be copied from production to $DEST_ALIAS
-	SRC_ALIAS="rhel-prod1"
-	;;
+@rhel-test*|@rhel-stage*)
+  # Database content will be copied from production to $DEST_ALIAS
+  SRC_ALIAS="@rhel-prod1"
+  ;;
 *)
-	echo -e" Must run this script on RHEL test or stage - exiting \n"
-	exit 1
-	;;
+  echo "Must run this script on RHEL test or stage - exiting"
+  exit 1
+  ;;
 esac
 
 # STEP 1 --------------------------------------------------------------------------------------------------------------
@@ -59,10 +59,10 @@ echo -e "\nSTEP 1 \n"
 
 # Get $SRC_ALIAS hostname, and test ability of drush command to access $SRC_ALIAS
 echo -e "Testing ability to reach $SRC_ALIAS....\n"
-SRC_URI=`$DRUSH site-alias --field-labels=0 --fields=uri --format=list @$SRC_ALIAS`
+SRC_URI=`$DRUSH site-alias --field-labels=0 --fields=uri --format=list $SRC_ALIAS`
 if [ $? -gt 0 ] ; then
-	echo -e "Unable to reference $SRC_ALIAS - exiting \n"
-	exit 1
+  echo -e "Unable to reference $SRC_ALIAS - exiting \n"
+  exit 1
 fi
 echo -e "Sucessfully connected to $SRC_ALIAS instance. \n"
 
@@ -85,11 +85,12 @@ echo -e "\nSTEP 2 \n"
 # --safe-links = ignore symlinks that point outside the tree (but there aren't any)
 
 for DIR in $STATIC_FILES; do
-    echo -e "Copying $DIR used by $SRC_ALIAS to the one used by $DEST_ALIAS ... \n"
-    sudo -u root /usr/bin/rsync -e 'ssh' -r -l -o -g -t -H -p -v \
-	--delete --safe-links \
-	--log-format="%o %b %f%L" \
-	$USER@$SRC_URI:$DIR $DIR
+  echo -e "Copying $DIR used by $SRC_ALIAS to the one used by $DEST_ALIAS ... \n"
+  sudo -u root /usr/bin/rsync -e 'ssh' -r -l -o -g -t -H -p -v \
+    --delete --safe-links \
+    --exclude='.snapshot' \
+    --log-format="%o %b %f%L" \
+    $USER@$SRC_URI:$DIR $DIR
 done
 
 # STEP 3 --------------------------------------------------------------------------------------------------------------
@@ -97,21 +98,21 @@ echo -e "\nSTEP 3 \n"
 
 # Drop all tables in the database used by $DEST_ALIAS - this is to ensure a clean local environment
 echo -e "Dropping all tables used by $DEST_ALIAS. \n"
-$DRUSH @$DEST_ALIAS sql-drop --yes
+$DRUSH $DEST_ALIAS sql-drop --yes
 
 # STEP 4 --------------------------------------------------------------------------------------------------------------
 echo -e "\nSTEP 4 \n"
 
 # Copy the database used by $SRC_ALIAS to the one used by $DEST_ALIAS
 echo -e "Copying the database used by $SRC_ALIAS to the one used by $DEST_ALIAS. \n"
-$DRUSH sql-sync @$SRC_ALIAS @$DEST_ALIAS --no-cache --yes
+$DRUSH sql-sync $SRC_ALIAS $DEST_ALIAS --yes
 
 # STEP 5 --------------------------------------------------------------------------------------------------------------
 echo -e "\nSTEP 5 \n"
 
 # Clear the $DEST_ALIAS Drupal Cache
 echo -e "Clearing the Drupal cache for $DEST_ALIAS... \n"
-$DRUSH @$DEST_ALIAS cache-clear all
+$DRUSH $DEST_ALIAS cache-clear all
 
 # Drupal refresh is complete
 echo -e "Drupal content copy from $SRC_ALIAS to $DEST_ALIAS is complete. \n"

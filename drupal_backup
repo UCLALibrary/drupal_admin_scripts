@@ -9,20 +9,20 @@
 # Must be this user to run this script
 USER=druadmin
 if [ "`/usr/bin/id -urn`" != "$USER" ] ; then
-        echo "You must be the $USER user to execute this script - exiting."
-        exit 1
+  echo "You must be the $USER user to execute this script - exiting."
+  exit 1
 fi
 
-DRUSH=/usr/local/bin/drush
+DRUSH="/home/druadmin/.composer/vendor/bin/drush"
 
 # Get local drush alias
 # Drush Alias - only need one as all webheads share the same database instance and the same static files
 # All drush aliases can be found in ~/$USER/.drush/aliases.drushrc.php
 # Our convention for Drush aliases: @rhel-[test|stage|prod][0-9]
-SRC_DRUSH=@`$DRUSH site-alias --local`
+SRC_DRUSH=`$DRUSH site-alias --local-only`
 if [ $? -ne 0 ] ; then
-        echo -e "Failed to get alias for local Drupal instance - exiting \n"
-        exit 1
+  echo -e "Failed to get alias for local Drupal instance - exiting \n"
+  exit 1
 fi
 
 TODAY=`date +%Y%m%d`
@@ -65,7 +65,7 @@ for SUBDIR in $SUBDIR_LIST; do
   #   OS-X-specific .TemporaryItems directories
   #   Windows-specific Thumbs.db files
   # ./.check_mount, which Nagios uses to verify that the file system is mounted
-  tar czf $SUBDIR_TAR_GZ -C $WEBHEAD_ROOT/$SUBDIR .	\
+  tar czf $SUBDIR_TAR_GZ -C $WEBHEAD_ROOT/$SUBDIR .    \
     --exclude ".apdisk"           \
     --exclude ".DS_Store"         \
     --exclude ".TemporaryItems"   \
@@ -91,9 +91,9 @@ BACKUP_DATES=`find $BACKUP_TOPLEVEL -type d -name "[0-9]*" -printf "%f\n" | sort
 # Each backup directory is named in YYYYMMDD format based on the day it was created.
 # If a directory's name is older than seven days ago, the directory is removed.
 if [ -n "$BACKUP_DATES" ] ; then
-        for DATE in $BACKUP_DATES ; do
-                if [ $(( $DATE - $SEVENDAYSAGO )) -lt 0 ] ; then
-                        rm -rf $BACKUP_TOPLEVEL/$DATE
-                fi
-        done
+  for DATE in $BACKUP_DATES ; do
+    if [ $(( $DATE - $SEVENDAYSAGO )) -lt 0 ] ; then
+      rm -rf $BACKUP_TOPLEVEL/$DATE
+    fi
+  done
 fi
