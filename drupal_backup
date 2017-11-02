@@ -76,6 +76,7 @@ for SUBDIR in $SUBDIR_LIST; do
     --exclude ".apdisk"           \
     --exclude ".DS_Store"         \
     --exclude ".TemporaryItems"   \
+    --exclude "tmp"               \
     --exclude "Thumbs.db"         \
     --exclude "./.check_mount"    \
     --exclude ".snapshot" > /dev/null 2>&1

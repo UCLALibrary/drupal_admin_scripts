@@ -88,6 +88,7 @@ for SUBDIR in $STATIC_FILES_SUBDIR_LIST; do
     --exclude ".apdisk"           \
     --exclude ".DS_Store"         \
     --exclude ".TemporaryItems"   \
+    --exclude "tmp"               \
     --exclude "Thumbs.db"         \
     --exclude "./.check_mount"    \
     --exclude ".snapshot" > /dev/null 2>&1
@@ -116,4 +117,3 @@ fi
 
 # Clean up DB dump and static files
 rm -rf $TMP_DIR
-
