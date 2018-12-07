@@ -52,17 +52,11 @@ if ! mkdir -m 700 $TMP_DIR; then
 fi
 
 # Create MySQL database dump file
+# Drush now gzips automatically, so use SQL_DUMP as the file name for drush but SQL_DUMP_GZ for OS operations.
 echo -e "\nCreating SQL dump file from $SRC_DRUSH Drupal instance \n"
 $DRUSH $SRC_DRUSH sql-dump --result-file=$SQL_DUMP
-if [ ! -s $SQL_DUMP ] ; then
-  echo -e "\nFailed to create the MySQL database dump file $SQL_DUMP - exiting \n"
-  exit 1
-fi
-# GZIP the MySQL database dump file
-echo -e "\ngzipping $SQL_DUMP \n"
-gzip $SQL_DUMP
-if [ $? -ne 0 ] ; then
-  echo -e "Failed to gzip '$SQL_DUMP' - exiting \n"
+if [ ! -s $SQL_DUMP_GZ ] ; then
+  echo -e "\nFailed to create the MySQL database dump file $SQL_DUMP_GZ- exiting \n"
   exit 1
 fi
 
